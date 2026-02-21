@@ -6,9 +6,6 @@ node_modules/
 backend/node_modules/
 frontend/captcha-system/node_modules/
 
-ml-service/model.pkl
-ml-service/scaler.pkl
-ml-service/feature_order.pkl
 
 
 ml-service/data/*.xlsx
