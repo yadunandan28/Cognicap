@@ -1,0 +1,74 @@
+services:
+
+  redis:
+    image: redis:7-alpine
+    container_name: captcha_redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  ml-service:
+    build:
+      context: ./ml-service
+      dockerfile: Dockerfile
+    container_name: captcha_ml
+    restart: unless-stopped
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    ports:
+      - "8001:8000"           # host:container — 8001 outside, 8000 inside
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./ml-service/model.pkl:/app/model.pkl:ro
+      - ./ml-service/scaler.pkl:/app/scaler.pkl:ro
+      - ./ml-service/feature_order.pkl:/app/feature_order.pkl:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/')"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s    # ← give it time to load the model before checking
+
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: captcha_backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL:   ${DATABASE_URL}
+      ML_SERVICE_URL: http://ml-service:8001
+      PORT:           5000
+      NODE_ENV:       production
+    ports:
+      - "5000:5000"
+    depends_on:
+      ml-service:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: "./frontend/captcha system"
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:5000}
+    container_name: captcha_frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+volumes:
+  redis_data:

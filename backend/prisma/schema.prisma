@@ -1,0 +1,44 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Session {
+  id                    String   @id @default(cuid())
+  createdAt             DateTime @default(now())
+  user_id               String
+  sessionDuration       Float
+  avgTypingSpeed        Float
+  typingVariance        Float
+  mouseMoveCount        Float
+  clickIntervalAvg      Float
+  mousePathLength       Float
+  backspaceCount        Float
+  focusChanges          Float
+  idleTimeRatio         Float
+  keyHoldTimeMean       Float
+  keyFlightTimeVariance Float
+  correctionDelayMean   Float
+  pasteUsageCount       Float
+  mouseAccelerationMean Float
+  mouseDirectionChanges Float
+  clickRandomnessScore  Float
+  requestsPerMinute     Float
+  sessionRequestCount   Float
+  burstScore            Float
+  honeypotTriggered     Int
+  finalRiskScore        Float?
+  attackIntensity       Float?
+  userTrust             Int?
+  decision              String?
+}
