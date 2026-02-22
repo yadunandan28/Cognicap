@@ -13,9 +13,6 @@ class RedisState:
                 decode_responses=True
             )
 
-    # -----------------------
-    # GLOBAL ATTACK INTENSITY
-    # -----------------------
     def get_attack_intensity(self):
         value = self.client.get("attack_intensity")
         return float(value) if value else 0.0
@@ -23,9 +20,6 @@ class RedisState:
     def set_attack_intensity(self, value):
         self.client.set("attack_intensity", value)
 
-    # -----------------------
-    # USER TRUST
-    # -----------------------
     def get_user_trust(self, user_id):
         trust = self.client.get(f"user_trust:{user_id}")
         return int(trust) if trust else 0
