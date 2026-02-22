@@ -1,18 +1,17 @@
 import os
 import redis
 
-
 class RedisState:
-
     def __init__(self):
-        # Reads from environment so it works both locally and in Docker
-        # Local:  REDIS_HOST=localhost (default)
-        # Docker: REDIS_HOST=redis     (service name in docker-compose)
-        self.client = redis.Redis(
-            host=os.getenv("REDIS_HOST", "localhost"),
-            port=int(os.getenv("REDIS_PORT", 6379)),
-            decode_responses=True
-        )
+        redis_url = os.getenv("REDIS_URL")
+        if redis_url:
+            self.client = redis.from_url(redis_url, decode_responses=True)
+        else:
+            self.client = redis.Redis(
+                host=os.getenv("REDIS_HOST", "localhost"),
+                port=int(os.getenv("REDIS_PORT", 6379)),
+                decode_responses=True
+            )
 
     # -----------------------
     # GLOBAL ATTACK INTENSITY
